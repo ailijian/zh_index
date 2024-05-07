@@ -1,7 +1,7 @@
 import erniebot
 import json
 
-from config.setting import ERNIEBOT_ACCESS_TOKEN
+from application.config.setting import ERNIEBOT_ACCESS_TOKEN
 
 
 class Ernie:
