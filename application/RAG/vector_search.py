@@ -4,7 +4,7 @@ import numpy as np
 import time
 from application.RAG import vector_store
 from application.RAG.file_preprocessing import doc_to_vector
-from application.models.embedding import embeddings
+from application.models.embedding import Embedding
 
 
 def timer_decorator(func):

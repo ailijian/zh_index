@@ -10,7 +10,7 @@ from application.agents.retrieval_agent import RetrieveAgent
 from common.common import Common
 from application.RAG import vector_store
 from application.RAG.file_preprocessing import doc_to_vector
-from application.models.embedding import embeddings
+from application.models.embedding import Embedding
 from application.database.user_info.messages import get_user_message
 
 # 实例化意图agent
