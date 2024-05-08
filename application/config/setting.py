@@ -12,10 +12,7 @@ des = "线上数据库"
 # database = "robots"
 # des = "本地数据库"
 
-# [Embedding]
-path = "./model_file/bge-base-zh-v1.5"  # 服务器
-# path = r"E:\models\bge-base-zh-v1.5"  # 李健本地
-reranker_path = "./model_file/bge-reranker-base"
+
 
 # [Token]
 #  设置文心一言的token
@@ -32,3 +29,8 @@ SECRET_KEY = "4j5IUiAuM3xTyCF1U6e8ovDzpnxFpxbL"
 # 使用阿里的KEY
 DASHSCOPE_API_KEY = "sk-c5c2c9e8ed5940e7a92122ae4824db47"
 
+# [Embedding]
+embedding_model_path = r"E:\models\bge-base-zh-v1.5"  # 李健公司电脑本地
+path = "./model_file/bge-base-zh-v1.5"  # 服务器
+# path = r"E:\models\bge-base-zh-v1.5"  # 李健本地
+reranker_path = "./model_file/bge-reranker-base"

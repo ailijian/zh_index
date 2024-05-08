@@ -15,6 +15,22 @@ class Files:
         pass
 
     @staticmethod
+    def merge_texts(cut_texts):
+        while len(cut_texts) > 1:
+            merged_text = cut_texts[-1]
+            tokens = merged_text.split()
+            if len(tokens) > 200:
+                return merged_text  # 返回token数量大于200的文本
+            else:
+                # 移除可能存在的多余空格和结尾的标点符号
+                merged_text = merged_text.rstrip('.!?，。！？')
+                prev_text = cut_texts[-2].rstrip('.!?，。！？')
+                cut_texts[-2] = prev_text + '。' + merged_text
+                cut_texts.pop()  # 移除已合并的最后一个文本
+        # 如果所有文本都已合并，则返回合并后的单个文本
+        return cut_texts[0]
+
+    @staticmethod
     def cut_text_by_rules(text, size=120):
         cut_texts = []  # 存储最终切割好的文本段
 
@@ -35,21 +51,7 @@ class Files:
 
         print("初步分割cut_texts：", cut_texts)
 
-        while len(cut_texts) > 0:
-            last_text = cut_texts[-1]
-            # 假设我们使用非空白字符作为token的简单分词方法
-            tokens = last_text.split()
-            if len(tokens) > size:
-                print(last_text)  # 输出token数量大于200的文本
-                break  # 既然已经找到一个大于200的，就停止合并
-            else:
-                # 如果小于200，则合并倒数第一和倒数第二个文本
-                if len(cut_texts) == 1:
-                    # print("All texts have been merged and none exceeded 200 tokens.")
-                    break
-                else:
-                    cut_texts[-2] = cut_texts[-2] + ' ' + last_text
-                    cut_texts.pop()  # 移除已合并的最后一个文本
+        cut_texts = Files.merge_texts(cut_texts)
 
         print("最终cut_texts：", cut_texts)
 
