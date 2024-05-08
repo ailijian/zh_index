@@ -1,0 +1,2 @@
+llama-index==0.10.33
+agently==3.2.2.8
