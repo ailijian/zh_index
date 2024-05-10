@@ -1,7 +1,7 @@
 # 定义一个基础agent类
 import Agently
 import time
-from config import setting
+from application.config import setting
 
 
 class BaseAgent:
@@ -22,7 +22,7 @@ class BaseAgent:
                             )
 
     @staticmethod
-    def create_agent(current_model: str = "ERNIE", model: str = "ernie-4.0",
+    def create_agent(current_model: str = "ERNIE", model: str = "ernie-speed",
                      token: str = setting.ERNIEBOT_ACCESS_TOKEN,
                      agent_id=None, is_debug: bool = False):
         # current_model = 'BaiduQianFan'

@@ -1,13 +1,17 @@
 # 对各种格式的文件预处理，包括加载、抽取元数据、储存、索引和嵌入
+import asyncio
+
 from llama_index.core import Document, SimpleDirectoryReader, Settings
 from llama_index.core.node_parser import (
     SentenceSplitter,
     SemanticSplitterNodeParser,
 )
+
+from application.agents.document_agent import DocumentAgent
 from application.models.embedding.EmbeddingLlamaIndex import get_embedding_with_llama_index
 from application.models.llm.ErnieLlamaIndex import Ernie
-from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.document_loaders import WebBaseLoader, DirectoryLoader, PyPDFDirectoryLoader
+
+import re
 
 
 class Files:
@@ -15,23 +19,44 @@ class Files:
         pass
 
     @staticmethod
-    def merge_texts(cut_texts):
-        while len(cut_texts) > 1:
-            merged_text = cut_texts[-1]
-            tokens = merged_text.split()
-            if len(tokens) > 200:
-                return merged_text  # 返回token数量大于200的文本
-            else:
-                # 移除可能存在的多余空格和结尾的标点符号
-                merged_text = merged_text.rstrip('.!?，。！？')
-                prev_text = cut_texts[-2].rstrip('.!?，。！？')
-                cut_texts[-2] = prev_text + '。' + merged_text
-                cut_texts.pop()  # 移除已合并的最后一个文本
-        # 如果所有文本都已合并，则返回合并后的单个文本
-        return cut_texts[0]
+    def tokenize(text):
+        """一个按一个中文字符或者英文字符为一个token切割并返回token数量的函数"""
+        # 使用正则表达式匹配汉字、英文字母、标点符号，忽略换行符和空格
+        pattern = r'[\u4e00-\u9fa5]|[a-zA-Z]|\\p{P}'
+        tokens = re.findall(pattern, text)
+        return len(tokens)
 
     @staticmethod
-    def cut_text_by_rules(text, size=120):
+    def merge_and_output(cut_texts, size):
+        """一个按size要求返回倒序文本段的函数"""
+        if not cut_texts:  # 如果cut_texts为空，则不做任何动作
+            return ''
+
+            # 检查最后一个元素的token数
+        tokens = Files.tokenize(cut_texts[-1])
+        if tokens > size:
+            # 如果大于size个tokens，则直接输出最后一个元素
+            print(cut_texts[-1])
+            return cut_texts[-1]
+
+            # 如果最后一个元素的token数小于size，则开始合并
+        merged_text = cut_texts[-1]
+        while len(cut_texts) > 1:
+            tokens = Files.tokenize(merged_text)
+            if tokens > size:
+                break  # 如果合并后的字符串token数大于size，则跳出循环
+
+            # 合并前一个元素和当前合并的文本
+            prev_text = cut_texts.pop(-2)  # 移除倒数第二个元素并返回它
+            merged_text = prev_text + ' ' + merged_text
+
+            # 输出最终合并的字符串
+        print(merged_text)
+        return merged_text
+
+    @staticmethod
+    def cut_text_by_rules(text, size=29):
+        """一个按\n和。进行分割，并按size要求返回倒序文本段的函数"""
         cut_texts = []  # 存储最终切割好的文本段
 
         # 第一步：先以“\n”为分隔符进行切割
@@ -51,11 +76,11 @@ class Files:
 
         print("初步分割cut_texts：", cut_texts)
 
-        cut_texts = Files.merge_texts(cut_texts)
+        end_cut_texts = Files.merge_and_output(cut_texts, size=size)
 
-        print("最终cut_texts：", cut_texts)
+        print("最终cut_texts：", end_cut_texts)
 
-        return cut_texts
+        return end_cut_texts
 
     @staticmethod
     def load_simple_files(directory, page_overlap: int = 120):
@@ -195,16 +220,29 @@ if __name__ == '__main__':
 
     # 制作节点
     nodes = Files.node_parser(documents)
+    node_content_list = []
     print("打印llama index的nodes：\n", nodes)
     print("############################")
     for node in nodes:
         print("打印node_id：\n", node.node_id)
         print("打印node_metadata：\n", node.metadata)
         print("打印node_content：\n", node.get_content())
+        node_content_list.append("标题：\n" + node.metadata["file_name"] + "\n内容：\n" + node.get_content())
         print("############################")
+
+    print("\n\n打印node_content_list长度：\n", len(node_content_list))
+    print("############################")
 
     # 测试语义分割
     # semantic_nodes = Files.semantic_splitter(documents, embed_model=get_embedding_with_llama_index())
     # for semantic_node in semantic_nodes:
     #     print("打印semantic_node节点：\n", semantic_node)
     #     print("############################")
+
+    # 测试文本段落信息抽取
+    # 组装段落为列表
+
+    # 实例化文档信息抽取agent
+    document_agent = DocumentAgent()
+    extract_result = asyncio.run(document_agent.extract_document_topic(node_content_list))
+    print("抽取结果：", extract_result)

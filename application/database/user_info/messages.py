@@ -1,6 +1,6 @@
 import time
 
-from config import setting
+from application.config import setting
 from extend.mysql.sql import Sql
 
 

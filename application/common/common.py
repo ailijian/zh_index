@@ -1,5 +1,5 @@
 from extend.mysql.sql import Sql
-from config import setting
+from application.config import setting
 import os
 import pickle
 

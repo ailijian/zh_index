@@ -3,7 +3,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from extend.mysql.sql import Sql
 import mysql.connector
-from config import setting
+from application.config import setting
 
 
 def split_documents(documents, size=500, overlap=50):

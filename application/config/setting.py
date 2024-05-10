@@ -17,7 +17,7 @@ des = "线上数据库"
 # [Token]
 #  设置文心一言的token
 # ERNIEBOT_ACCESS_TOKEN = "305b5ef9b5fcc3d1fca148fa80b31c306fc06415"  # 杨涛的token
-ERNIEBOT_ACCESS_TOKEN = "305b5ef9b5fcc3d1fca148fa80b31c306fc06415"  # 李健的token
+ERNIEBOT_ACCESS_TOKEN = "27d73eb449d08ad1d17211470aab1b21e8f0292f"  # 李健的token
 
 #  设置百川的api_key
 BAICHUAN_API_KEY = "sk-0afe222def5e2b5e8b8bf81671c3286f"

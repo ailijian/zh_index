@@ -1,15 +1,43 @@
-def tokenize_chinese_text(text):
-    # 使用正则表达式简单地将连续的中文字符、英文字母、数字视为一个token
-    # 这里为了简化，我们不考虑其他标点符号，只将中文字符、英文字母和数字视为token
-    tokens = []
-    for char in text:
-        if '\u4e00' <= char <= '\u9fff' or 'a' <= char <= 'z' or 'A' <= char <= 'Z' or '0' <= char <= '9':
-            tokens.append(char)
-            # 可以根据需要添加更多字符分类
-    return tokens
+import re
 
 
-def cut_text_by_rules(text, size=120):
+def tokenize(text):
+    """一个按一个中文字符或者英文字符为一个token切割并返回token数量的函数"""
+    # 使用正则表达式匹配汉字、英文字母、标点符号，忽略换行符和空格
+    pattern = r'[\u4e00-\u9fa5]|[a-zA-Z]|\\p{P}'
+    tokens = re.findall(pattern, text)
+    return len(tokens)
+
+
+def merge_and_output(cut_texts, size):
+    """一个按size要求返回倒序文本段的函数"""
+    if not cut_texts:  # 如果cut_texts为空，则不做任何动作
+        return ''
+
+        # 检查最后一个元素的token数
+    tokens = tokenize(cut_texts[-1])
+    if tokens > size:
+        # 如果大于size个tokens，则直接输出最后一个元素
+        print(cut_texts[-1])
+        return cut_texts[-1]
+
+        # 如果最后一个元素的token数小于size，则开始合并
+    merged_text = cut_texts[-1]
+    while len(cut_texts) > 1:
+        tokens = tokenize(merged_text)
+        if tokens > size:
+            break  # 如果合并后的字符串token数大于size，则跳出循环
+
+        # 合并前一个元素和当前合并的文本
+        prev_text = cut_texts.pop(-2)  # 移除倒数第二个元素并返回它
+        merged_text = prev_text + ' ' + merged_text
+
+        # 输出最终合并的字符串
+    print(merged_text)
+    return merged_text
+
+def cut_text_by_rules(text, size=29):
+    """一个按\n和。进行分割，并按size要求返回倒序文本段的函数"""
     cut_texts = []  # 存储最终切割好的文本段
 
     # 第一步：先以“\n”为分隔符进行切割
@@ -29,25 +57,11 @@ def cut_text_by_rules(text, size=120):
 
     print("初步分割cut_texts：", cut_texts)
 
-    while len(cut_texts) > 0:
-        last_text = cut_texts[-1]
-        # 假设我们使用非空白字符作为token的简单分词方法
-        tokens = last_text.split()
-        if len(tokens) > size:
-            print(last_text)  # 输出token数量大于200的文本
-            break  # 既然已经找到一个大于200的，就停止合并
-        else:
-            # 如果小于200，则合并倒数第一和倒数第二个文本
-            if len(cut_texts) == 1:
-                print("All texts have been merged and none exceeded 200 tokens.")
-                break
-            else:
-                cut_texts[-2] = cut_texts[-2] + ' ' + last_text
-                cut_texts.pop()  # 移除已合并的最后一个文本
+    end_cut_texts = merge_and_output(cut_texts, size=size)
 
-    print("最终cut_texts：", cut_texts)
+    print("最终cut_texts：", end_cut_texts)
 
-    return cut_texts
+    return end_cut_texts
 
 
 # 示例文本
@@ -59,5 +73,5 @@ text = """
 
 # 对文本进行切割
 cut_texts = cut_text_by_rules(text)
-for i, cut_text in enumerate(cut_texts):
-    print(f"Cut Text {i + 1}:\n{cut_text}\n")
+
+print(f"Cut Text:\n{cut_texts}\n")

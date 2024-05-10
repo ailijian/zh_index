@@ -7,7 +7,7 @@ from application.RAG.vector_search import retrieval_results
 from application.agents.chat_agent import ChatAgent
 from application.agents.intention_agent import IntentionAgent
 from application.agents.retrieval_agent import RetrieveAgent
-from common.common import Common
+from application.common.common import Common
 from application.RAG import vector_store
 from application.RAG.file_preprocessing import doc_to_vector
 from application.models.embedding import Embedding
@@ -22,6 +22,7 @@ chat_agent = ChatAgent()
 
 
 async def update_ui(result_file: list, emit=None, socketid=None):
+    """一个将检索信息同步到前端页面的函数"""
     # 遍历所有文件
     seen_file_names = set()
     unique_files = []
@@ -37,7 +38,7 @@ async def update_ui(result_file: list, emit=None, socketid=None):
         'file': unique_files,
     }
     Common().log_ini_add('文件分析打印', '222222', str(data))
-    """一个将检索信息同步到前端页面的函数"""
+
     emit(str(socketid), data)
 
 
@@ -132,7 +133,7 @@ async def router_qa(user_input: str, chat_history_list: str, user_intention: dic
     print(f"\n\n检索答案过滤时间为：{execution_time2}秒\n\n")
 
     # 将检索信息传到前端 2024年4月26日20:49:12====》前端未实现对接
-    await update_ui(filter_result["result_file"], emit, socketid)
+    # await update_ui(filter_result["result_file"], emit, socketid)
     # 将用户输入内容，历史对话和检索信息传入检索agent，获得回复
     results = await retrieve_agent.retrieve(user_input=user_input, chat_history=chat_history_list,
                                             intention_topic=user_intention["topic"],
@@ -203,7 +204,7 @@ async def agent_router(user_input, chat_history_list, agent_id: str, faiss_db=No
 
 
 if __name__ == "__main__":
-    embedding_model = embeddings.get_embedding_with_langchain()
+    embedding_model = Embedding.get_embedding_with_langchain()
     metadata = doc_to_vector.get_excel_docs()
     split_docs = doc_to_vector.list_to_document(metadata)
     db = vector_store.VectorStore.get_faiss_db(split_docs=split_docs, embedding_model=embedding_model)
